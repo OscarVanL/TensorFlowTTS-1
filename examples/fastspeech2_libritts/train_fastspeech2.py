@@ -360,7 +360,12 @@ def main():
         f0_stat=args.f0_stat,
         energy_stat=args.energy_stat,
         mel_length_threshold=mel_length_threshold,
-    ).create(
+    )
+
+    if len(train_dataset.speakers_map.keys()) != config["fastspeech2_params"]["n_speakers"]:
+        logging.warning("Number of speakers in dataset ({}) does not match configured n_speakers ({}).".format(len(train_dataset.speakers_map.keys()), config["fastspeech2_params"]["n_speakers"]))
+
+    train_dataset = train_dataset.create(
         is_shuffle=config["is_shuffle"],
         allow_cache=config["allow_cache"],
         batch_size=config["batch_size"] * STRATEGY.num_replicas_in_sync,
@@ -381,6 +386,7 @@ def main():
         allow_cache=config["allow_cache"],
         batch_size=config["batch_size"] * STRATEGY.num_replicas_in_sync,
     )
+
 
     # define trainer
     trainer = FastSpeech2Trainer(
